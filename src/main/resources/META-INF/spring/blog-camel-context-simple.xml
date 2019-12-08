@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:kie="http://drools.org/schema/kie-spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://drools.org/schema/kie-spring         org/kie/spring/kie-spring-2.0.0.xsd">
+
+  <!-- Beans used by camel in the example -->
+  <bean id="personHelper" class="org.fusesource.example.drools.PersonHelper"/>
+
+  <!-- Drools knowledge session -->
+  <kie:ksession-ref id="ksession1" />
+
+  <!-- Camel Route -->
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+
+    <route trace="false" id="ruleOnBody">
+      <description>This route shows an example of passing (inserting) the Body of the message as a POJO to Drools
+        for execution
+      </description>
+      <from uri="direct://ruleOnBody"/>
+      <to uri="kie:ksession1?action=insertBody">
+        <description>
+          'insertBody' that inserts the Exchange.in.body, and executes rules
+        </description>
+      </to>
+      <choice>
+        <when id="CanDrink">
+          <simple>${body.canDrink}</simple>
+          <log logName="Bar" message="Person ${body.name} can go to the bar"/>
+        </when>
+        <otherwise>
+          <log logName="Home" message="Person ${body.name} is staying home"/>
+        </otherwise>
+      </choice>
+    </route>
+    
+  </camelContext>
+
+</beans>
